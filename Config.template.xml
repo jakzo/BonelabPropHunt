@@ -1,14 +1,11 @@
-<!-- 
-=== Instructions ===
-Make a copy of this file and rename it `Config.xml` and set `GamePath` to
-your BONELAB directory.
-The built mod will be copied into the `Mods` directory of the game
-(unless GamePath is not set).
-Below are common locations for the Oculus and Steam versions of the game.
+<!--
+Config.xml is generated on build and can be modified based on where your game
+is so that references can be found.
 -->
 <Project>
     <PropertyGroup>
-        <!-- <GamePath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab</GamePath> -->
-        <!-- <GamePath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\BONELAB</GamePath> -->
+        <OculusGamePath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab</OculusGamePath>
+        <SteamGamePath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\BONELAB</SteamGamePath>
+        <OtherReferencesPath>./references</OtherReferencesPath>
     </PropertyGroup>
 </Project>

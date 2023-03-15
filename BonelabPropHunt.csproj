@@ -1,105 +1,128 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net4.7.2</TargetFramework>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="src/**/*" />
-  </ItemGroup>
-
-  <Import Project="Config.xml" />
-  <Import Project="Version.xml" />
-  <Import Project="Mod.xml" />
-
-  <!-- Versions -->
-  <PropertyGroup>
-    <!-- Overridden by CI to stg or prod -->
-    <BuildType>dev</BuildType>
-    <VersionDate>$([System.DateTimeOffset]::Now.ToString(yyyy-MM-dd--HH-mm-ss))</VersionDate>
-    <VersionSuffix Condition=" '$(BuildType)' != 'prod' ">$(VersionDate)--$(BuildType)</VersionSuffix>
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-    <InformationalVersion>$(Version)--$(VersionSuffix)</InformationalVersion>
-  </PropertyGroup>
-
-  <Target Name="GenerateMelonAssemblyAttributes" BeforeTargets="BeforeBuild;BeforeRebuild">
     <PropertyGroup>
-      <MelonAssemblyFile>$(IntermediateOutputPath)$(AssemblyName).MelonAssembly.cs</MelonAssemblyFile>
-      <MelonAssemblyContents>
-        using MelonLoader%3B
-        [assembly: MelonInfo(typeof($(AssemblyName).Mod), "$(AssemblyTitle)", "$(InformationalVersion)", "$(ModAuthor)", "$(ThunderstoreUrl)")]
-        [assembly: MelonGame("$(GameDeveloper)", "$(GameName)")]
-      </MelonAssemblyContents>
+        <TargetFramework>net4.7.2</TargetFramework>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     </PropertyGroup>
-    <WriteLinesToFile
-      File="$(MelonAssemblyFile)"
-      Lines="$(MelonAssemblyContents)"
-      Overwrite="true"
-      Encoding="Unicode"
-    />
+
     <ItemGroup>
-      <Compile Include="$(MelonAssemblyFile)" />
-      <FileWrites Include="$(MelonAssemblyFile)" />
+        <Compile Include="src/**/*" />
     </ItemGroup>
-  </Target>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' And GamePath != '' ">
-    <Exec Command=' copy "$(TargetPath)" "$(GamePath)\Mods" ' />
-  </Target>
+    <Target Name="GenerateConfig" BeforeTargets="BeforeBuild;BeforeRebuild">
+        <ReadLinesFromFile File="Config.template.xml">
+            <Output
+                TaskParameter="Lines"
+                ItemName="ConfigContents"
+            />
+        </ReadLinesFromFile>
+        <WriteLinesToFile
+            Condition=" !Exists('Config.xml') "
+            File="Config.xml"
+            Lines="@(ConfigContents)"
+            Encoding="Unicode"
+        />
+    </Target>
 
-  <ItemGroup>
-    <Reference Include="MelonLoader">
-      <HintPath>$(GamePath)/MelonLoader/MelonLoader.dll</HintPath>
-    </Reference>
-    <Reference Include="Harmony">
-      <HintPath>$(GamePath)/MelonLoader/0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(GamePath)/MelonLoader/Managed/Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="SLZ.Marrow">
-      <HintPath>$(GamePath)/MelonLoader/Managed/SLZ.Marrow.dll</HintPath>
-    </Reference>
-    <Reference Include="SLZ.Marrow.SDK">
-      <HintPath>$(GamePath)/MelonLoader/Managed/SLZ.Marrow.SDK.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(GamePath)/MelonLoader/Managed/Il2Cppmscorlib.dll</HintPath>
-    </Reference>
-    <Reference Include="UnhollowerBaseLib">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnhollowerBaseLib.dll</HintPath>
-    </Reference>
-    <Reference Include="UniTask">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UniTask.dll</HintPath>
-    </Reference>
-    <Reference Include="UnhollowerRuntimeLib">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnhollowerRuntimeLib.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.AnimationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(GamePath)/MelonLoader/Managed/Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.ResourceManager">
-      <HintPath>$(GamePath)/MelonLoader/Managed/Unity.ResourceManager.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VRModule">
-      <HintPath>$(GamePath)/MelonLoader/Managed/UnityEngine.VRModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <Import Project="Config.xml" Condition=" Exists('Config.xml') " />
+    <Import Project="Config.template.xml" Condition=" !Exists('Config.xml') " />
+    <Import Project="Version.xml" />
+    <Import Project="Mod.xml" />
+
+    <PropertyGroup>
+        <MelonLoaderPath Condition=" Exists('$(OculusGamePath)\MelonLoader') ">$(OculusGamePath)\MelonLoader</MelonLoaderPath>
+        <MelonLoaderPath Condition=" Exists('$(SteamGamePath)\MelonLoader') ">$(SteamGamePath)\MelonLoader</MelonLoaderPath>
+        <MelonLoaderPath Condition=" Exists('$(OtherReferencesPath)') ">$(OtherReferencesPath)</MelonLoaderPath>
+    </PropertyGroup>
+
+    <!-- Versions -->
+    <PropertyGroup>
+        <!-- Overridden by CI to stg or prod -->
+        <BuildType>dev</BuildType>
+        <VersionDate>$([System.DateTimeOffset]::Now.ToString(yyyy-MM-dd--HH-mm-ss))</VersionDate>
+        <VersionSuffix Condition=" '$(BuildType)' != 'prod' ">$(VersionDate)--$(BuildType)</VersionSuffix>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <InformationalVersion>$(Version)--$(VersionSuffix)</InformationalVersion>
+    </PropertyGroup>
+
+    <Target Name="GenerateMelonAssemblyAttributes" BeforeTargets="BeforeBuild;BeforeRebuild">
+        <PropertyGroup>
+            <MelonAssemblyFile>$(IntermediateOutputPath)$(AssemblyName).MelonAssembly.cs</MelonAssemblyFile>
+            <MelonAssemblyContents>
+                using MelonLoader%3B
+                [assembly: MelonInfo(typeof($(AssemblyName).Mod), "$(AssemblyTitle)", "$(InformationalVersion)", "$(ModAuthor)", "$(ThunderstoreUrl)")]
+                [assembly: MelonGame("$(GameDeveloper)", "$(GameName)")]
+            </MelonAssemblyContents>
+        </PropertyGroup>
+        <WriteLinesToFile
+            File="$(MelonAssemblyFile)"
+            Lines="$(MelonAssemblyContents)"
+            Overwrite="true"
+            Encoding="Unicode"
+        />
+        <ItemGroup>
+            <Compile Include="$(MelonAssemblyFile)" />
+            <FileWrites Include="$(MelonAssemblyFile)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent"
+        Condition=" '$(OS)' == 'Windows_NT' And GamePath != '' ">
+        <Exec Command=' copy "$(TargetPath)" "$(GamePath)\Mods" ' />
+    </Target>
+
+    <ItemGroup>
+        <Reference Include="MelonLoader">
+            <HintPath>$(MelonLoaderPath)/MelonLoader.dll</HintPath>
+        </Reference>
+        <Reference Include="Harmony">
+            <HintPath>$(MelonLoaderPath)/0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(MelonLoaderPath)/Managed/Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="SLZ.Marrow">
+            <HintPath>$(MelonLoaderPath)/Managed/SLZ.Marrow.dll</HintPath>
+        </Reference>
+        <Reference Include="SLZ.Marrow.SDK">
+            <HintPath>$(MelonLoaderPath)/Managed/SLZ.Marrow.SDK.dll</HintPath>
+        </Reference>
+        <Reference Include="Il2Cppmscorlib">
+            <HintPath>$(MelonLoaderPath)/Managed/Il2Cppmscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnhollowerBaseLib">
+            <HintPath>$(MelonLoaderPath)/Managed/UnhollowerBaseLib.dll</HintPath>
+        </Reference>
+        <Reference Include="UniTask">
+            <HintPath>$(MelonLoaderPath)/Managed/UniTask.dll</HintPath>
+        </Reference>
+        <Reference Include="UnhollowerRuntimeLib">
+            <HintPath>$(MelonLoaderPath)/Managed/UnhollowerRuntimeLib.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.PhysicsModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.AnimationModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(MelonLoaderPath)/Managed/Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.ResourceManager">
+            <HintPath>$(MelonLoaderPath)/Managed/Unity.ResourceManager.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.VRModule">
+            <HintPath>$(MelonLoaderPath)/Managed/UnityEngine.VRModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
 </Project>

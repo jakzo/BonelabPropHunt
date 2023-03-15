@@ -1,7 +1,7 @@
 {
-  "name": "PropHunt",
-  "version_number": "0.0.0",
-  "description": "Hide and seek while disguised as random objects.",
-  "website_url": "https://github.com/jakzo/BonelabPropHunt",
-  "dependencies": ["LavaGang-MelonLoader-0.5.7"]
+    "name": "PropHunt",
+    "version_number": "0.0.0",
+    "description": "Hide and seek while disguised as random objects.",
+    "website_url": "https://github.com/jakzo/BonelabPropHunt",
+    "dependencies": ["LavaGang-MelonLoader-0.5.7"]
 }

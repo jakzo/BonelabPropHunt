@@ -63,8 +63,7 @@ namespace BonelabPropHunt
 				MelonLogger.Warning("Cannot shape-shift into this prop!");
 				return;
 			}
-			// PropAvatarPrefab.Load(prefab =>
-			//                           PropAvatar.Switch(rigManager, prop, prefab));
+			// PropAvatarPrefab.Load(prefab => PropAvatar.Switch(rigManager, prop, prefab));
 			PropAvatar.Switch(rigManager, prop);
 		}
 
