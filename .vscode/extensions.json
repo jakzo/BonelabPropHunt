@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "muhammad-sammy.csharp",
+    "esbenp.prettier-vscode",
+    "csharpier.csharpier-vscode",
+    "redhat.vscode-xml",
+    "redhat.vscode-yaml"
+  ]
+}

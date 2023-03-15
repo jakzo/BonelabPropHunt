@@ -2,6 +2,7 @@
 /thunderstore/Mods/
 /thunderstore/README.md
 /thunderstore/*.zip
+/Config.xml
 
 
 ## Ignore Visual Studio temporary files, build results, and
