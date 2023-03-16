@@ -87,7 +87,8 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[xml]": {
-        "editor.defaultFormatter": "redhat.vscode-xml"
+        "editor.defaultFormatter": "redhat.vscode-xml",
+        "files.trimFinalNewlines": false
     },
     "[yaml]": {
         "editor.defaultFormatter": "redhat.vscode-yaml"
